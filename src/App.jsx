@@ -1,149 +1,185 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography } from '@mui/material';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { motion } from 'framer-motion';
-import Sidebar from './components/Sidebar';
-import TableView from './components/TableView';
-import JsonYamlConverter from './components/JsonYamlConverter';
-import ImageProcessor from './components/ImageProcessor';
-import QRCodeGenerator from './components/QRCodeGenerator';
-import MarkdownEditor from './components/MarkdownEditor';
+import React from 'react';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  NavLink,
+  useLocation
+} from 'react-router-dom';
+import {
+  Box,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Typography,
+  Paper,
+  Avatar,
+  Divider
+} from '@mui/material';
+import { routes } from './routes';
+import BuildIcon from '@mui/icons-material/Build';
 
-// 创建自定义主题
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#91B493',
-      light: '#B5C9B7',
-      dark: '#728F74'
-    },
-    secondary: {
-      main: '#D4E4D4',
-    },
-    background: {
-      default: '#F5F9F5'
-    }
-  },
-  typography: {
-    fontFamily: "'Poppins', 'Noto Sans SC', sans-serif",
-  }
-});
+const DRAWER_WIDTH = 260;
 
-function App() {
-  const [jsonData, setJsonData] = useState({ header: [], data: [] });
-  const [selectedFile, setSelectedFile] = useState('data.json');
-  const [activeView, setActiveView] = useState('table');
-
-  const jsonFiles = {
-    'data.json': '👥 人员数据',
-    'data2.json': '🛍️ 产品数据'
-  };
-
-  useEffect(() => {
-    loadJsonData(selectedFile);
-  }, [selectedFile]);
-
-  const loadJsonData = async (filename) => {
-    try {
-      const response = await fetch(filename);
-      const data = await response.json();
-      setJsonData(data);
-    } catch (error) {
-      console.error('JSON 加载错误:', error);
-    }
-  };
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { duration: 0.6 }
-    }
-  };
-
-  const tableRowVariants = {
-    hidden: { opacity: 0, x: -20 },
-    visible: i => ({
-      opacity: 1,
-      x: 0,
-      transition: {
-        delay: i * 0.1,
-        duration: 0.4,
-      }
-    })
-  };
-
-  const renderContent = () => {
-    switch (activeView) {
-      case 'table':
-        return (
-          <TableView
-            jsonData={jsonData}
-            selectedFile={selectedFile}
-            setSelectedFile={setSelectedFile}
-            jsonFiles={jsonFiles}
-            tableRowVariants={tableRowVariants}
-          />
-        );
-      case 'chart':
-        return <div>图表分析功能开发中...</div>;
-      case 'timeline':
-        return <div>时间轴功能开发中...</div>;
-      case 'converter':
-        return <JsonYamlConverter />;
-      case 'image':
-        return <ImageProcessor />;
-      case 'qrcode':
-        return <QRCodeGenerator />;
-      case 'markdown':
-        return <MarkdownEditor />;
-      default:
-        return null;
-    }
-  };
+// 导航组件
+function Navigation() {
+  const location = useLocation();
+  const currentPath = location.pathname;
 
   return (
-    <ThemeProvider theme={theme}>
+    <Drawer
+      variant="permanent"
+      sx={{
+        width: DRAWER_WIDTH,
+        flexShrink: 0,
+        '& .MuiDrawer-paper': {
+          width: DRAWER_WIDTH,
+          boxSizing: 'border-box',
+          bgcolor: 'background.paper',
+          borderRight: 'none',
+        },
+      }}
+    >
+      {/* Logo 和标题区域 */}
       <Box
-        component={motion.div}
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
         sx={{
+          p: 3,
           display: 'flex',
-          padding: '12px',
-          gap: '16px',
-          maxWidth: '1400px',
-          margin: '0 auto',
-          minHeight: '100vh',
-          background: 'linear-gradient(135deg, #EFF5F0 0%, #F5F9F5 100%)',
+          alignItems: 'center',
+          gap: 2,
         }}
       >
-        <Sidebar activeView={activeView} onViewChange={setActiveView} />
+        <Avatar
+          sx={{
+            width: 40,
+            height: 40,
+            bgcolor: 'primary.main',
+            background: 'linear-gradient(45deg, #2196f3 30%, #21cbf3 90%)',
+          }}
+        >
+          <BuildIcon />
+        </Avatar>
+        <Typography
+          variant="h6"
+          component="div"
+          sx={{
+            background: 'linear-gradient(45deg, #1976d2 30%, #2196f3 90%)',
+            backgroundClip: 'text',
+            textFillColor: 'transparent',
+            fontWeight: 700,
+          }}
+        >
+          开发工具集
+        </Typography>
+      </Box>
 
-        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <Typography
-            variant="h5"
-            component="h1"
+      <Divider sx={{ mx: 2, mb: 2 }} />
+
+      {/* 导航菜单 */}
+      <List sx={{ px: 2 }}>
+        {routes.map(({ path, label, icon: Icon }) => (
+          <ListItem key={path} disablePadding sx={{ mb: 1 }}>
+            <ListItemButton
+              component={NavLink}
+              to={path}
+              selected={currentPath === path}
+              sx={{
+                borderRadius: 2,
+                transition: 'all 0.2s',
+                '&.active': {
+                  bgcolor: 'primary.light',
+                  '& .MuiListItemIcon-root': {
+                    color: 'primary.main',
+                  },
+                  '& .MuiListItemText-primary': {
+                    color: 'primary.main',
+                    fontWeight: 600,
+                  },
+                },
+                '&:hover': {
+                  bgcolor: 'primary.light',
+                  transform: 'translateX(4px)',
+                },
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  minWidth: 40,
+                  color: currentPath === path ? 'primary.main' : 'text.secondary',
+                }}
+              >
+                <Icon />
+              </ListItemIcon>
+              <ListItemText
+                primary={label}
+                primaryTypographyProps={{
+                  fontSize: '0.95rem',
+                  fontWeight: currentPath === path ? 600 : 400,
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+
+      {/* 底部版权信息 */}
+      <Box sx={{ flexGrow: 1 }} />
+      <Box sx={{ p: 2, textAlign: 'center' }}>
+        <Typography variant="caption" color="text.secondary">
+          © 2023 开发工具集
+        </Typography>
+      </Box>
+    </Drawer>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <Box sx={{
+        display: 'flex',
+        minHeight: '100vh',
+        bgcolor: 'background.default'
+      }}>
+        <Navigation />
+
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: 4,
+            width: { sm: `calc(100% - ${DRAWER_WIDTH}px)` },
+            minHeight: '100vh',
+            background: 'linear-gradient(145deg, #fafafa 0%, #f5f5f5 100%)',
+          }}
+        >
+          <Paper
+            elevation={0}
             sx={{
-              mb: 3,
-              color: theme.palette.primary.main,
-              fontWeight: 'bold',
-              textShadow: '1px 1px 2px rgba(145, 180, 147, 0.2)',
+              p: 3,
+              minHeight: 'calc(100vh - 64px)',
+              borderRadius: 4,
+              bgcolor: 'rgba(255, 255, 255, 0.8)',
+              backdropFilter: 'blur(8px)',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
             }}
           >
-            {activeView === 'table' ? '数据表格' :
-              activeView === 'chart' ? '图表分析' :
-                activeView === 'converter' ? 'JSON-YAML' :
-                  activeView === 'image' ? '图片处理' :
-                    activeView === 'qrcode' ? '二维码' :
-                      activeView === 'markdown' ? 'Markdown' : '时间轴'}
-          </Typography>
-
-          {renderContent()}
+            <Routes>
+              {routes.map(({ path, component: Component }) => (
+                <Route
+                  key={path}
+                  path={path}
+                  element={<Component />}
+                />
+              ))}
+            </Routes>
+          </Paper>
         </Box>
       </Box>
-    </ThemeProvider>
+    </Router>
   );
 }
 
