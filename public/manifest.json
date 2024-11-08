@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "The Tools",
+  "version": "1.0",
+  "description": "Powerful tools",
+  "permissions": [
+    "storage"
+  ],
+  "action": {
+    "default_popup": "index.html"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "*.js",
+        "*.css",
+        "assets/*"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}

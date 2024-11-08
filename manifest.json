@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "JSON 数据查看器",
+  "version": "1.0",
+  "description": "读取并展示本地 JSON 数据的表格视图",
+  "permissions": [
+    "storage"
+  ],
+  "action": {
+    "default_popup": "index.html"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "*.js",
+        "*.css",
+        "assets/*"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}
